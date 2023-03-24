@@ -1,13 +1,15 @@
-const express = require('express');
-const path = require('path');
+import express from 'express'
+import {getFullFilePath} from './utility.js';
+
+
 const app = express();
-const port = 8080;
+
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '/index.html'));
+  res.sendFile(getFullFilePath('calendar.html'));
 });
 
-
+const port = 8080;
 app.listen(port, () => {
   console.log(`helloworld: listening on port ${port}`);
 });
