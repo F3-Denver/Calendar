@@ -14,9 +14,9 @@ apiRouter.route('/').get((req, res) => {
  	debug('calling');
 
 	const url =`mongodb+srv://f3denver:${process.env.EVENTDBPASSWORD}@events.5kscka4.mongodb.net/?retryWrites=true&w=majority`
-	const dbName = 'Events';
+	const dbName = 'Events'
 	
-	(async function mongo() {
+	;(async function mongo() {
 		let client
 		try {
 			client = await MongoClient.connect(url)
