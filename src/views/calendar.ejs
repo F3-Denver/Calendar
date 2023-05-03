@@ -16,7 +16,8 @@
 						selectable: <%=editMode%>,
 						select: function(info) {
 								alert('selected ' + info.startStr + ' to ' + info.endStr)
-						}
+						},
+						events: '/api'
 				})
 				calendar.render()
 			})
