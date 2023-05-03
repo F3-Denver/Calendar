@@ -4,7 +4,7 @@
   "description": "Public calendar for sharing regional events.",
   "main": "server.js",
   "scripts": {
-    "test": "set DEBUG=app & nodemon app.js",
+    "test": "set DEBUG=app,app:* & nodemon app.js",
     "start": "node app.js"
   },
   "repository": {

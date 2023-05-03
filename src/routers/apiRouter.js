@@ -9,30 +9,30 @@ apiRouter.route('/').get((req, res) => {
 	const end = req.query.end
 
 	if (start == null || end == null){
-		res.status(401).send('Request must include parameters "start" and "end".')
+		res.status(400).send('Request must include parameters "start" and "end".')
 	}
+ 	debug('calling');
+
+	const url =`mongodb+srv://f3denver:${process.env.EVENTDBPASSWORD}@events.5kscka4.mongodb.net/?retryWrites=true&w=majority`
+	const dbName = 'Events';
 	
-	const url = `mongodb+srv://f3denver:${process.env.EVENTDBPASSWORD}@events.5kscka4.mongodb.net/?retryWrites=true&w=majority`
-  
-    (async function mongo() {
-      let client;
-      try {
-        client = await MongoClient.connect(url);
-        debug('Connected to the mongo DB');
+	(async function mongo() {
+		let client
+		try {
+			client = await MongoClient.connect(url)
+			debug('Connected to the mongo DB')
 		
-		const query = { id: 1 }
-		const response = await client.db('Events').collection('Events').find({
-			date: {
-				$gte: start,
-				$lt: end,
-		  	}}).toArray()
-		res.json(response)
-      } catch (error) {
-        debug(error.stack);
-      } finally {
-		client.close();
-	  }
-    })();
-  });
+			const db = client.db(dbName)
+		
+			const response = await db.collection('Events').find().toArray()
+			res.json(response)
+			client.close()
+		} catch (error) {
+			debug(error.stack);
+			res.status(500).send(`Cannot connect\n\n${error.stack}`)
+		}
+		
+	})();
+});
   
   module.exports = apiRouter;
