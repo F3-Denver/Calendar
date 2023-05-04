@@ -1,14 +1,18 @@
 const express = require('express');
 const debug = require('debug')('app:apiRouter');
 const { MongoClient } = require('mongodb');
+const isodate = require('isodate')
 
 const apiRouter = express.Router();
 
 apiRouter.route('/').get((req, res) => {
-    const start = req.query.start
-	const end = req.query.end
+    const queryStart = req.query.start
+	const queryEnd = req.query.end
 
-	if (start == null || end == null){
+	const a = isodate(queryStart)
+	const b = isodate(queryEnd)
+
+	if (queryStart == null || queryEnd == null){
 		res.status(400).send('Request must include parameters "start" and "end".')
 	}
  	debug('calling');
@@ -24,7 +28,28 @@ apiRouter.route('/').get((req, res) => {
 		
 			const db = client.db(dbName)
 		
-			const response = await db.collection('Events').find().toArray()
+			const response = await client.db('Events').collection('Events').find({
+				$or:[
+					{
+						$and: [
+							{ start: { $gte: isodate(queryStart) } },
+							{ start: { $lt: isodate(queryEnd) } }
+						]
+					},
+					{
+						$and: [
+							{ end: { $gte: isodate(queryStart) } },
+							{ end: { $lt: isodate(queryEnd) } }
+						]
+					},
+					{
+						$and: [
+							{ start: { $lt: isodate(queryStart) } },
+							{ end: { $gte: isodate(queryEnd) } }
+						]
+					}
+				]
+			  }).toArray()
 			res.json(response)
 			client.close()
 		} catch (error) {
