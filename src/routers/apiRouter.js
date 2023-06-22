@@ -4,14 +4,16 @@ const axios = require('axios').default
 
 const apiRouter = express.Router();
 
+// Custom Variables
+const eventQueryLink = "https://sheets.googleapis.com/v4/spreadsheets/1sLq5aMdx9sCQXxVh0gzZMj_pywDeh_E6U1f18FObAvQ/values/Events?key=AIzaSyBy50CfayeCy395Q-JfhS28_JCTaXqBFOc"
+const categoryQueryLink = "https://script.google.com/macros/s/AKfycbzm8fW4M7hGCVPk4qXX-8fuv8ukF3y2zfrU98P31ML5KvMGWJ6pHzgbjQ9hXgbfVX8z4Q/exec"
+
 apiRouter.route('/events').get((req, res) => {
 
 	;(async function call() {
-		const url =`https://sheets.googleapis.com/v4/spreadsheets/${process.env.EVENTDBID}/values/Events?key=${process.env.EVENTDBKEY}`
-
 		try {
 			debug('calling events');
-			const response = await axios.get(url)
+			const response = await axios.get(eventQueryLink)
 			const data = response.data.values
 
 			const headers = data[0]
@@ -155,7 +157,7 @@ apiRouter.route('/categories').get((req, res) => {
 async function getCategories() {
 	try {
 		debug('calling categories');
-		const response = await axios.get(process.env.CATEGORIESENDPOINT)
+		const response = await axios.get(categoryQueryLink)
 		const data = response.data
 		return data
 	} catch (error) {
