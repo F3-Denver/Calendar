@@ -30,11 +30,7 @@ app.get('/status', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.render('calendar', {title: process.env.TITLE, editMode: false})
-});
-
-app.get('/edit', (req, res) => {
-  res.render('calendar', {title: 'Calendar Editor', editMode: true})
+  res.render('calendar', {title: process.env.TITLE, backendLink: process.env.EVENTDBLINK})
 });
 
 app.listen(port, () => {

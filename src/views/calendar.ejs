@@ -2,6 +2,37 @@
 <html>
 	<head>
 		<title><%=title%></title>
+		<style>
+			body
+
+			.fc {
+				z-index: 2;
+				position: relative;
+			}
+			
+			/* The Modal (background) */
+			.modal {
+				display: none; /* Hidden by default */
+				position: fixed; /* Stay in place */
+				z-index: 1; /* Sit on top */
+				left: 0;
+				top: 0;
+				width: 100%; /* Full width */
+				height: 100%; /* Full height */
+				overflow: auto; /* Enable scroll if needed */
+				background-color: rgb(0,0,0); /* Fallback color */
+				background-color: rgba(0, 0, 0, 0.781); /* Black w/ opacity */
+			}
+
+			/* Modal Content/Box */
+			.modal-content {
+				background-color: #fefefe;
+				margin: 15% auto; /* 15% from the top and centered */
+				padding: 20px;
+				border: 1px solid #888;
+				width: 80%; /* Could be more or less, depending on screen size */
+			} 
+		</style>
 		<script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
@@ -11,27 +42,54 @@
 						headerToolbar: {
 								left: 'prev today next',
 								center: 'title',
-								right: 'dayGridDay,dayGridWeek,dayGridMonth,dayGridYear list' // user can switch between the two
+								right: 'dayGridDay,dayGridWeek,dayGridMonth,dayGridYear listMonth' // user can switch between the two
 						},
-						selectable: <%=editMode%>,
-						select: function(info) {
-								alert('selected ' + info.startStr + ' to ' + info.endStr)
-						},
-						events: '/api'
+						events: '/api/events',
+						eventClick: function(info){
+							alert(info.event.title)
+						}
 				})
 				calendar.render()
 			})
 
 		</script>
+		<script>
+			function openModal() {
+				var modal = document.getElementById("editModal")
+				modal.style.display = "block"
+			}
+
+			function closeModal() {
+				var modal = document.getElementById("editModal")
+				modal.style.display = "none"
+				alert("Back")
+			}
+
+			function goToEdit() {
+				var response = confirm("Events are managed in a Google Sheet. To add, edit, or remove events from this calendar, you must have Edit rights in the backend Google Sheet. If you do not have access and would like it, send a request to admin@f3denverco.com.")
+				if (response) {
+					window.open("<%=backendLink%>", "_blank")
+				}
+			}
+		</script>
 	</head>
 	<body>
-		<div id='calendar'></div>
-		<div style="float: right;">
-			<% if (editMode) { %>
-				<button type="button" onclick="document.location.href='/'">Stop Editting</button>
-			<% } else { %>
-				<button type="button" onclick="document.location.href='/edit'">Edit</button>
-			<% } %>
+		<!-- Edit Modal -->
+		<div id="editModal" class="modal">
+			<div class="modal-content">
+				<p>Events are managed in a Google Sheet. To add, edit, or remove events from this calendar, you must have Edit rights in the backend Google Sheet. If you do not have access and would like it, send a request to <a href = "mailto:admin@f3denverco.com" target="_blank">admin@f3denverco.com</a>.</p>
+				<button id="btnBackToCalendar" type="button" onclick="closeModal()" style="z-index: 1;">Back to Calendar</button>
+				<a class="btn btn-success" href="<%= backendLink %>" target="_blank">Google</a>
+				
+			</div>
+		</div>
+
+		<!-- The Calendar -->
+		<div id="calendar"></div>
+
+		<!-- Edit Button -->
+		<div id="edit" style="float: right;">
+			<button id="btnEdit" type="button" onclick="goToEdit()">Edit</button>
 		</div>
 	</body>
 </html>
