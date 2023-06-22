@@ -7,7 +7,7 @@ const morgan = require('morgan')
 // Custom variables
 const title = "F3 Denver Calendar"
 const linkToEventDatabase = "https://docs.google.com/spreadsheets/d/1sLq5aMdx9sCQXxVh0gzZMj_pywDeh_E6U1f18FObAvQ/edit"
-const port = 8081
+const port = 8080
 
 const app = express()
 const apiRouter = require('./src/routers/apiRouter')
