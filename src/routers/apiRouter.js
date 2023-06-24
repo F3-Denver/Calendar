@@ -1,6 +1,7 @@
 const express = require('express');
 const debug = require('debug')('app:apiRouter');
 const axios = require('axios').default
+const moment = require('moment')
 
 const apiRouter = express.Router();
 
@@ -33,7 +34,9 @@ apiRouter.route('/events').get((req, res) => {
 				}
 				
 				let event = {}
+				event["extendedProps"] = {}
 
+				// Title
 				let title
 				if (eventFields.hasOwnProperty('Title')) {
 					title = eventFields["Title"]
@@ -42,9 +45,11 @@ apiRouter.route('/events').get((req, res) => {
 				}
 				event['title'] = title
 
+				// Category / Color
 				let color
 				if (eventFields.hasOwnProperty("Category")) {
 					const category = eventFields["Category"]
+					event["extendedProps"]["category"] = category
 					const categoryColor = categories.find(e => e.Name == category)
 
 					if (undefined == categoryColor) {
@@ -56,18 +61,22 @@ apiRouter.route('/events').get((req, res) => {
 					color = "#808080"
 				}
 				event["color"] = color
-				
+
+				// Location
 				if (eventFields.hasOwnProperty('Location')) {
-					event["extendedProps"] = {"location": eventFields["Location"]}
+					event["extendedProps"]["location"] = eventFields["Location"]
 				}
 				
+				// All Day
 				const allDay = eventFields["All Day"] == "TRUE"
 				event["allDay"] = allDay
 
+				// Date / Time
 				if (eventFields.hasOwnProperty("Recurring Day")) {
 					// Recurring
 					
 					event["daysOfWeek"] = dayOfWeek[eventFields["Recurring Day"]]
+					event["extendedProps"]["recurringDay"] = eventFields["Recurring Day"]
 
 					if (eventFields.hasOwnProperty("Day")){
 						event["startRecur"] = new Date(eventFields["Day"])
@@ -81,11 +90,13 @@ apiRouter.route('/events').get((req, res) => {
 					if (!allDay) {
 						
 						if (!eventFields.hasOwnProperty("Start")) {
-							res.status(400).send(`Issue in the event database. Contact admin. Event with title '${title}' does not have a value in the Start column. Start needs to be provided if Reccuring Day is set and All Day is not TRUE.`)
+							console.error(`Issue in the event database. Contact admin. Event with title '${title}' (spreadsheet row ${eventRaw}) does not have a value in the Start column. Start needs to be provided if Reccuring Day is set and All Day is not TRUE. Event will not be shown.`)
+							continue
 						}
 
 						if (!eventFields.hasOwnProperty("End")) {
-							res.status(400).send(`Issue in the event database. Contact admin. Event with title '${title}' does not have a value in the End column. End needs to be provided if Reccuring Day is set and All Day is not TRUE.`)
+							console.error(`Issue in the event database. Contact admin. Event with title '${title}' (spreadsheet row ${eventRaw}) does not have a value in the End column. End needs to be provided if Reccuring Day is set and All Day is not TRUE. Event will not be shown.`)
+							continue
 						}
 
 						event["startTime"] = eventFields["Start"]
@@ -96,7 +107,8 @@ apiRouter.route('/events').get((req, res) => {
 					// Non-Recurring
 
 					if (!eventFields.hasOwnProperty("Day")) {
-						res.status(400).send(`Issue in the event database. Contact admin. Event with title '${title}' does not have a value in the Day column.`)
+						console.error(`Issue in the event database. Contact admin. Event with title '${title}' (spreadsheet row ${eventRaw}) does not have a value in the Day column. Event will not be shown.`)
+						continue
 					}
 
 					if (allDay){
@@ -112,14 +124,17 @@ apiRouter.route('/events').get((req, res) => {
 						// Non-Recurring, Not All day
 
 						if (!eventFields.hasOwnProperty("Start")) {
-							res.status(400).send(`Issue in the event database. Contact admin. Event with title '${title}' does not have a value in the Start column.`)
+							console.error(`Issue in the event database. Contact admin. Event with title '${title}' (spreadsheet row ${eventRaw}) does not have a value in the Start column. Event will not be shown.`)
+							continue
 						}
 
 						if (!eventFields.hasOwnProperty("End")) {
-							res.status(400).send(`Issue in the event database. Contact admin. Event with title '${title}' does not have a value in the End column.`)
+							console.error(`Issue in the event database. Contact admin. Event with title '${title}' (spreadsheet row ${eventRaw}) does not have a value in the End column. Event will not be shown.`)
+							continue
 						}
 
-						event["start"] = new Date(`${eventFields["Day"]} ${eventFields["Start"]}`)
+						const start = new Date(`${eventFields["Day"]} ${eventFields["Start"]}`)
+						event["start"] = moment(start).format('yyyy-MM-DDTHH:mm')
 
 						let end
 						if (eventFields.hasOwnProperty("Last Day")) {
@@ -127,7 +142,7 @@ apiRouter.route('/events').get((req, res) => {
 						} else {
 							end = new Date(`${eventFields["Day"]} ${eventFields["End"]}`)
 						}
-						event["end"] = end
+						event["end"] = moment(end).format('yyyy-MM-DDTHH:mm')
 					}
 				}
 
@@ -137,7 +152,7 @@ apiRouter.route('/events').get((req, res) => {
 			res.json(events)
 		} catch (error) {
 			debug(error.stack);
-			res.status(500).send(`Cannot connect\n\n${error.stack}`)
+			res.status(500).send(`Error getting events: \r\n\r\n${error.stack}`)
 		}
 	})()
 })

@@ -8,6 +8,7 @@ const morgan = require('morgan')
 const title = "F3 Denver Calendar"
 const linkToEventDatabase = "https://docs.google.com/spreadsheets/d/1sLq5aMdx9sCQXxVh0gzZMj_pywDeh_E6U1f18FObAvQ/edit"
 const port = 8080
+const timezoneDescriptor = "Mountain Time"
 
 const app = express()
 const apiRouter = require('./src/routers/apiRouter')
@@ -28,7 +29,10 @@ app.get('/status', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.render('calendar', {title: title, backendLink: linkToEventDatabase})
+  res.render('calendar', {
+    title: title,
+    backendLink: linkToEventDatabase,
+    timezone: timezoneDescriptor})
 });
 
 app.listen(port, () => {

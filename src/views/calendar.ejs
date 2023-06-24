@@ -4,17 +4,16 @@
 		<title><%=title%></title>
 		<style>
 			body
-
-			.fc {
-				z-index: 2;
-				position: relative;
-			}
 			
+			.fc-event {
+				cursor: pointer;
+			}
+
 			/* The Modal (background) */
 			.modal {
 				display: none; /* Hidden by default */
 				position: fixed; /* Stay in place */
-				z-index: 1; /* Sit on top */
+				z-index: 5; /* Sit on top */
 				left: 0;
 				top: 0;
 				width: 100%; /* Full width */
@@ -32,44 +31,106 @@
 				border: 1px solid #888;
 				width: 80%; /* Could be more or less, depending on screen size */
 			} 
+
+			.button {
+				background-color: #acacac;
+				border: none;
+				color: black;
+				padding: 5px 15px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 14px;
+				cursor: pointer;
+				margin: 5px;
+			}
+
+			.timezone {
+				display: inline-block;
+				color: red;
+			}
+
+			/* The Close Button */
+			.close {
+				color: #aaa;
+				float: right;
+				font-size: 28px;
+				font-weight: bold;
+			}
+
+			.close:hover,
+			.close:focus {
+				color: black;
+				text-decoration: none;
+				cursor: pointer;
+			}
 		</style>
+		<script src='https://cdn.jsdelivr.net/npm/moment/min/moment.min.js'></script>
+		<script src='https://cdn.jsdelivr.net/npm/moment-timezone/builds/moment-timezone-with-data.min.js'></script>
 		<script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
+		<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/moment-timezone/index.global.min.js"></script>
 		<script>
+			function openEventDetailModal(info) {
+				console.log(JSON.stringify(info.event))
+				var modalContent = document.getElementById("eventDetailModalContent")
+
+				// Title
+				var title = document.createElement("p")
+				title.innerText = info.event.title
+				title.style.fontWeight = "bold"
+				modalContent.append(title)
+
+				// Category
+				if (info.event.extendedProps.hasOwnProperty("category")) {
+					var category = document.createElement("p")
+					category.innerText = info.event.extendedProps["category"]
+					category.style.fontStyle = "italic"
+					modalContent.append(category)
+				}
+		
+				var modal = document.getElementById("eventDetailModal")
+				modal.style.display = "block"
+			}
+
+			function closeEventDetailModal() {
+				var modalContent = document.getElementById("eventDetailModalContent")
+				var children = modalContent.children
+				for (var i = 1; i < children.length; i++){
+					modalContent.removeChild(children[i])
+				}
+				
+				var modal = document.getElementById("eventDetailModal")
+				modal.style.display = "none"
+			}
+			
 			document.addEventListener('DOMContentLoaded', function() {
 				const calendarEl = document.getElementById('calendar')
 				const calendar = new FullCalendar.Calendar(calendarEl, {
-						initialView: 'dayGridMonth',
-						headerToolbar: {
-								left: 'prev today next',
-								center: 'title',
-								right: 'dayGridDay,dayGridWeek,dayGridMonth,dayGridYear listMonth' // user can switch between the two
-						},
-						events: '/api/events',
-						eventClick: function(info){
-							alert(info.event.title)
-						}
+					timeZone:'America/Denver',
+					initialView: 'dayGridMonth',
+					headerToolbar: {
+						left: 'prev today next',
+						center: 'title',
+						right: 'dayGridDay,dayGridWeek,dayGridMonth,dayGridYear listMonth'
+					},
+					events: '/api/events',
+					eventClick: function(info){
+						openEventDetailModal(info)
+					}
 				})
 				calendar.render()
 			})
 
 		</script>
 		<script>
-			function openModal() {
+			function openEditModal() {
 				var modal = document.getElementById("editModal")
 				modal.style.display = "block"
 			}
 
-			function closeModal() {
+			function closeEditModal() {
 				var modal = document.getElementById("editModal")
 				modal.style.display = "none"
-				alert("Back")
-			}
-
-			function goToEdit() {
-				var response = confirm("Events are managed in a Google Sheet. To add, edit, or remove events from this calendar, you must have Edit rights in the backend Google Sheet. If you do not have access and would like it, send a request to admin@f3denverco.com.")
-				if (response) {
-					window.open("<%=backendLink%>", "_blank")
-				}
 			}
 		</script>
 	</head>
@@ -78,18 +139,27 @@
 		<div id="editModal" class="modal">
 			<div class="modal-content">
 				<p>Events are managed in a Google Sheet. To add, edit, or remove events from this calendar, you must have Edit rights in the backend Google Sheet. If you do not have access and would like it, send a request to <a href = "mailto:admin@f3denverco.com" target="_blank">admin@f3denverco.com</a>.</p>
-				<button id="btnBackToCalendar" type="button" onclick="closeModal()" style="z-index: 1;">Back to Calendar</button>
-				<a class="btn btn-success" href="<%= backendLink %>" target="_blank">Google</a>
-				
+				<a class="button" onclick="closeEditModal()">Back to Calendar</button>
+				<a class="button" href="<%= backendLink %>" target="_blank">Open Google Sheet</a>
+			</div>
+		</div>
+
+		<!-- Event Detail Modal -->
+		<div id="eventDetailModal" class="modal">
+			<div id="eventDetailModalContent" class="modal-content">
+				<span class="close" onclick="closeEventDetailModal()">&times;</span>
 			</div>
 		</div>
 
 		<!-- The Calendar -->
 		<div id="calendar"></div>
 
-		<!-- Edit Button -->
-		<div id="edit" style="float: right;">
-			<button id="btnEdit" type="button" onclick="goToEdit()">Edit</button>
+		<!-- Time Zone -->
+		<div class="timezone">
+			<p>(All events showin in <%=timezone%>)</p>
 		</div>
+
+		<!-- Edit Button -->
+		<a class="button" onclick="openEditModal()" style="float: right;">Edit</button>
 	</body>
 </html>
