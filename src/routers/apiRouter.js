@@ -45,6 +45,11 @@ apiRouter.route('/events').get((req, res) => {
 				}
 				event['title'] = title
 
+				// Description
+				if (eventFields.hasOwnProperty('Description')) {
+					event["extendedProps"]["description"] = eventFields["Description"]
+				}
+
 				// Category / Color
 				let color
 				if (eventFields.hasOwnProperty("Category")) {
