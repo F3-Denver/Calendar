@@ -2,174 +2,15 @@
 <html>
 	<head>
 		<title><%=title%></title>
-		<style>
-			body
-			
-			.fc-event {
-				cursor: pointer;
-			}
-
-			/* The Modal (background) */
-			.modal {
-				display: none; /* Hidden by default */
-				position: fixed; /* Stay in place */
-				z-index: 5; /* Sit on top */
-				left: 0;
-				top: 0;
-				width: 100%; /* Full width */
-				height: 100%; /* Full height */
-				overflow: auto; /* Enable scroll if needed */
-				background-color: rgb(0,0,0); /* Fallback color */
-				background-color: rgba(0, 0, 0, 0.781); /* Black w/ opacity */
-			}
-
-			/* Modal Content/Box */
-			.modal-content {
-				background-color: #fefefe;
-				margin: 15% auto; /* 15% from the top and centered */
-				padding: 20px;
-				border: 1px solid #888;
-				width: 80%; /* Could be more or less, depending on screen size */
-			} 
-
-			.button {
-				background-color: #acacac;
-				border: none;
-				color: black;
-				padding: 5px 15px;
-				text-align: center;
-				text-decoration: none;
-				display: inline-block;
-				font-size: 14px;
-				cursor: pointer;
-				margin: 5px;
-			}
-
-			.timezone {
-				display: inline-block;
-				color: red;
-			}
-
-			/* The Close Button */
-			.close {
-				color: #aaa;
-				float: right;
-				font-size: 28px;
-				font-weight: bold;
-			}
-
-			.close:hover,
-			.close:focus {
-				color: black;
-				text-decoration: none;
-				cursor: pointer;
-			}
-		</style>
+		<link rel="stylesheet" href="public/style/Calendar.css">
 		<script src='https://cdn.jsdelivr.net/npm/moment/min/moment.min.js'></script>
 		<script src='https://cdn.jsdelivr.net/npm/moment-timezone/builds/moment-timezone-with-data.min.js'></script>
 		<script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
 		<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/moment-timezone/index.global.min.js"></script>
+		<script src ="public/scripts/Editmodal.js" type="text/javascript"></script>
+		<script src ="public/scripts/DetailModal.js" type="text/javascript"></script>
+		<script src ="public/scripts/KeyStrokes.js" type="text/javascript"></script>
 		<script>
-			function openEventDetailModal(info) {
-				console.log(JSON.stringify(info.event))
-				var modalContent = document.getElementById("eventDetailModalContent")
-
-				// Title
-				var title = document.createElement("H1")
-				title.innerText = info.event.title
-				title.style.fontWeight = "bold"
-				modalContent.append(title)
-
-				// Category
-				if (info.event.extendedProps.hasOwnProperty("category")) {
-					var category = document.createElement("p")
-					category.innerText = info.event.extendedProps["category"]
-					category.style.fontStyle = "italic"
-					modalContent.append(category)
-				}
-
-				// Description
-				if (info.event.extendedProps.hasOwnProperty("description")) {
-					var category = document.createElement("p")
-					category.innerText = info.event.extendedProps["description"]
-					modalContent.append(category)
-				}
-
-				// Time
-				var timeLabel = document.createElement("p")
-				timeLabel.innerText = "When:"
-				timeLabel.style.display = "inline-block"
-				timeLabel.style.fontWeight = "bold"
-				timeLabel.style.marginRight = "5px"
-				modalContent.append(timeLabel)
-
-				var start = moment(info.event["start"])
-				var end = moment(info.event["end"])
-				var allDay = info.event["allDay"]
-
-				if (allDay) {
-					var timeMessage = start.format("dddd M/D/YY")
-					
-					if (end.isValid()) {
-						timeMessage += ` to ${end.format("dddd M/D/YY")}`
-					}
-				} else {
-					var timeMessage = start.format("dddd M/D/YY h:mm A [<%=timeZone.abbreviation%>]")
-
-					if (end.isValid()) {
-						
-						if (start.isSame(end, "day")) {
-							timeMessage += ` to ${end.format("h:mm A [<%=timeZone.abbreviation%>]")}`
-						} else {
-							timeMessage += ` to ${end.format("dddd M/D/YY h:mm A [<%=timeZone.abbreviation%>]")}`
-						}
-					}
-				}
-
-				if (info.event.extendedProps.hasOwnProperty("recurringDay")) {
-					timeMessage += ` (occurs every ${info.event.extendedProps["recurringDay"]})`
-				}
-				
-				var time = document.createElement("p")
-				time.innerText = timeMessage
-				time.style.display = "inline-block"
-				modalContent.append(time)
-
-				// Location
-				if (info.event.extendedProps.hasOwnProperty("location")) {
-					modalContent.append(document.createElement("div"))
-					
-					var locationLabel = document.createElement("p")
-					locationLabel.innerText = "Where:"
-					locationLabel.style.display = "inline-block"
-					locationLabel.style.fontWeight = "bold"
-					locationLabel.style.marginRight = "5px"
-					modalContent.append(locationLabel)
-
-					var location = document.createElement("p")
-					location.innerText = info.event.extendedProps["location"]
-					location.style.display = "inline-block"
-					modalContent.append(location)
-				}
-		
-				var modal = document.getElementById("eventDetailModal")
-				modal.style.display = "block"
-			}
-
-			function closeEventDetailModal() {
-				
-				// Remove all elements except the first (the close button)
-				var modalContent = document.getElementById("eventDetailModalContent")
-				var children = modalContent.children
-				while (children.length > 1){
-					modalContent.removeChild(children[1])
-				}
-				
-				// "Hide" the modal
-				var modal = document.getElementById("eventDetailModal")
-				modal.style.display = "none"
-			}
-			
 			document.addEventListener('DOMContentLoaded', function() {
 				const calendarEl = document.getElementById('calendar')
 				const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -182,26 +23,17 @@
 					},
 					events: '/api/events',
 					eventClick: function(info){
-						openEventDetailModal(info)
+						openEventDetailModal(info, "<%=timeZone.abbreviation%>")
 					}
 				})
 				calendar.render()
 			})
-
-		</script>
-		<script>
-			function openEditModal() {
-				var modal = document.getElementById("editModal")
-				modal.style.display = "block"
-			}
-
-			function closeEditModal() {
-				var modal = document.getElementById("editModal")
-				modal.style.display = "none"
-			}
 		</script>
 	</head>
 	<body>
+		<!-- The Calendar -->
+		<div id="calendar"></div>
+		
 		<!-- Edit Modal -->
 		<div id="editModal" class="modal">
 			<div class="modal-content">
@@ -218,9 +50,6 @@
 			</div>
 		</div>
 
-		<!-- The Calendar -->
-		<div id="calendar"></div>
-
 		<!-- Time Zone -->
 		<div class="timezone">
 			<p>(All events showin in <%=timeZone.description%>)</p>
@@ -228,5 +57,10 @@
 
 		<!-- Edit Button -->
 		<a class="button" onclick="openEditModal()" style="float: right;">Edit</button>
+
+		<script>
+			document.getElementById('eventDetailModal').addEventListener("click", potentiallyCloseEventDetailModal)
+			document.getElementById('editModal').addEventListener("click", potentiallyCloseEditModal)
+		</script>
 	</body>
 </html>
