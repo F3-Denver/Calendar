@@ -74,9 +74,11 @@ function openEventDetailModal(info, timeZone) {
         locationLabel.style.marginRight = "5px"
         modalContent.append(locationLabel)
 
-        var location = document.createElement("p")
+        var location = document.createElement("a")
         location.innerText = info.event.extendedProps["location"]
         location.style.display = "inline-block"
+        location.href = `https://www.google.com/maps/search/?api=1&query=${info.event.extendedProps["location"]}`
+        location.target = "_blank"
         modalContent.append(location)
     }
 
